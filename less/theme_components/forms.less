@@ -1,5 +1,9 @@
 /*! -- Stack Forms -- */
 
+form:before,form:after{
+	content: '';
+}
+
 .bg--dark,.imagebg:not(.image--light){
 	input,textarea, select, .input-select:after{
 		color: @color-body;
@@ -230,6 +234,16 @@ label{
 	}
 	input{
 		padding-left: @base-line-height*1.5;
+	}
+	&.input-icon--right{
+		i{
+			left: auto;
+			right: 8px;
+		}
+		input{
+			padding-right: @base-line-height*1.5;
+			padding-left: .92857143em;
+		}
 	}
 }
 
@@ -489,6 +503,9 @@ label{
 		-moz-appearance: none;
 		-webkit-appearance: none;
 	}
+	select::-ms-expand{
+		display:none;
+	}
 	&:not(:last-child){
 		margin-bottom: @base-line-height/2;
 	}
@@ -504,6 +521,11 @@ label{
 		padding:0 13px;
 		border-left: 1px solid #ececec;
 		line-height: 31px;
+	}
+	&.input-select--borderless{
+		&:after{
+			border-left: none;
+		}
 	}
 	&:focus{
 		&:after{
@@ -560,6 +582,12 @@ label{
 			border-right: 1px solid #ececec;
 		}
 	}
+}
+
+input[type="image"]{
+  padding: 0;
+  width: auto;
+  border:  none;
 }
 
 /*! -- Stack Subscribe Forms -- */
@@ -641,6 +669,11 @@ label{
 
 .datepicker{
 	cursor: pointer;
+	&.datepicker--fluid{
+		+.picker{
+			max-width: none;
+		}
+	}
 }
 
 .picker{
@@ -731,5 +764,32 @@ label{
 		&:not(:hover){
 			opacity: .5;
 		}
+	}
+}
+
+/* Stack Horizontal Forms */
+
+.form-horizontal{
+	display: flex;
+	> div[class*='col-'], >div[class*='col-']:not(:last-child){
+		margin-bottom: 0;
+		display: flex;
+		align-items: flex-end;
+		flex-wrap: wrap;
+	}
+	.picker{
+		top: 100%;
+	}
+}
+
+@media all and (max-width: 990px){
+	.form-horizontal{
+		display: block;
+	}
+	label{
+		margin-top: @base-line-height/4;
+	}
+	button{
+		margin-top: @base-line-height;
 	}
 }

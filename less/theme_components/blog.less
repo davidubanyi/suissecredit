@@ -264,7 +264,6 @@ section.unpad{
 .masonry-filter-container{
 	> span{
 		position: relative;
-		bottom: 20px;
 		+.masonry-filter-holder{
 			margin-left: @base-line-height/2;
 		}
@@ -397,16 +396,14 @@ section.unpad{
 	}
 }
 
-.sidebar{
-	.sidebar__widget{
-		> h5{
-			&:first-child{
-				margin-bottom: @base-line-height/2;
-			}
+.sidebar__widget{
+	> h5{
+		&:first-child{
+			margin-bottom: @base-line-height/2;
 		}
-		&:not(:last-child){
-			margin-bottom: @base-line-height*2;
-		}
+	}
+	&:not(:last-child){
+		margin-bottom: @base-line-height*2;
 	}
 }
 

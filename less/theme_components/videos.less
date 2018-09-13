@@ -42,11 +42,16 @@
 			margin-left: @base-line-height/2;
 		}
 	}
-	.video-play-icon{
-		.transition(0.2s,ease-out);
-		&:hover{
-			.box-shadow-wide;
-			.translate3d(-50%,-52%,0);
+}
+
+@media all and (min-width: 1025px){
+	.video-cover{
+		.video-play-icon{
+			.transition(0.2s,ease-out);
+			&:hover{
+				.box-shadow-wide;
+				.translate3d(-50%,-52%,0);
+			}
 		}
 	}
 }

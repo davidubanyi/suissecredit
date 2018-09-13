@@ -67,7 +67,9 @@ if(isset($_POST['email']) && isset($_POST['name']) ){
 }else{ $fromArray = array($sendingAccountUsername => $websiteName); }
 
 $message = Swift_Message::newInstance($emailSubject)
+  ->setSender(array($sendingAccountUsername => $websiteName))
   ->setFrom($fromArray)
+  ->setReplyTo($fromArray)
   ->setTo(array($recipientEmail => $recipientName))->setBody($htmlHead.$messageText.$htmlFoot, 'text/html');
 
 // Send the message or catch an error if it occurs.

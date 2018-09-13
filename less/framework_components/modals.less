@@ -103,6 +103,15 @@
 	}
 }
 
+.modal-content{
+	&.section-modal{
+		pointer-events: none;
+		[class*='col-']{
+			pointer-events: all;
+		}
+	}
+}
+
 @media all and (max-width: 767px){
 	.modal-container{
 		.modal-content{

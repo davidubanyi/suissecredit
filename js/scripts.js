@@ -1,9 +1,12 @@
 
-var mr = (function ($, window, document){
+window.mr = window.mr || {};
+
+mr = (function (mr, $, window, document){
     "use strict";
 
-    var mr         = {},
-        components = {documentReady: [],documentReadyDeferred: [], windowLoad: [], windowLoadDeferred: []};
+    mr = mr || {};
+
+    var components = {documentReady: [],documentReadyDeferred: [], windowLoad: [], windowLoadDeferred: []};
 
     mr.status = {documentReadyRan: false, windowLoadPending: false};
 
@@ -49,7 +52,7 @@ var mr = (function ($, window, document){
     mr.windowLoad    = windowLoad;
 
     return mr;
-}(jQuery, window, document));
+}(window.mr, jQuery, window, document));
 
 
 //////////////// Utility Functions
@@ -389,8 +392,7 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
 
-    mr.accordions = {};
-
+    mr.accordions = mr.accordions || {};
     
     mr.accordions.documentReady = function($){
         $('.accordion__title').on('click', function(){
@@ -403,18 +405,24 @@ mr = (function (mr, $, window, document){
             accordion.css('min-height',minHeight);
         });
 
-        if(window.location.hash !== ''){
-             mr.accordions.activatePanelById(window.location.hash, true);
+        if(window.location.hash !== '' && window.location.hash !== '#' && window.location.hash.match(/#\/.*/) === null){
+            if($('.accordion > li > .accordion__title'+window.location.hash).length){
+                 mr.accordions.activatePanelById(window.location.hash, true);
+            }
         }
 
-        $('a[href^="#"]').on('click', function(){
-             mr.accordions.activatePanelById($(this).attr('href'), true);
+        jQuery(document).on('click', 'a[href^="#"]:not(a[href="#"])', function(){
+             
+             if($('.accordion > li > .accordion__title'+$(this).attr('href')).length){
+                mr.accordions.activatePanelById($(this).attr('href'), true);
+             }
         });
     };
 
     
 
     mr.accordions.activatePanel = function(panel, forceOpen){
+        
         var $panel    = $(panel),
             accordion = $panel.closest('.accordion'),
             li        = $panel.closest('li'),
@@ -424,13 +432,19 @@ mr = (function (mr, $, window, document){
             openEvent.initEvent('panelOpened.accordions.mr', true, true);
             closeEvent.initEvent('panelClosed.accordions.mr', true, true);
         
+
+
         if(li.hasClass('active')){
+            
             if(forceOpen !== true){
+                
                 li.removeClass('active');
                 $panel.trigger('panelClosed.accordions.mr').get(0).dispatchEvent(closeEvent);
             }
         }else{
+            
             if(accordion.hasClass('accordion--oneopen')){
+                
                 var wasActive = accordion.find('li.active');
                 if(wasActive.length){
                     wasActive.removeClass('active');
@@ -440,23 +454,25 @@ mr = (function (mr, $, window, document){
                 li.trigger('panelOpened.accordions.mr').get(0).dispatchEvent(openEvent);
                 
             }else{
+                
                 if(!li.is('.active')){
                     li.trigger('panelOpened.accordions.mr').get(0).dispatchEvent(openEvent);
                 }
                 li.addClass('active');
             }
         }
-    }
+    };
 
     mr.accordions.activatePanelById = function(id, forceOpen){
         var panel;
-
-        if(id !== '' && id !== '#'){
+       
+        if(id !== '' && id !== '#' && id.match(/#\/.*/) === null){
             panel = $('.accordion > li > .accordion__title#'+id.replace('#', ''));
             if(panel.length){
                 $('html, body').stop(true).animate({
                     scrollTop: (panel.offset().top - 50)
                 }, 1200);
+                
                 mr.accordions.activatePanel(panel, forceOpen);
             }
         }
@@ -471,18 +487,16 @@ mr = (function (mr, $, window, document){
 //////////////// Alerts
 mr = (function (mr, $, window, document){
     "use strict";
+
+    mr.alerts = mr.alerts || {};
     
-    var documentReady = function($){
+    mr.alerts.documentReady = function($){
         $('.alert__close').on('click touchstart', function(){
             jQuery(this).closest('.alert').addClass('alert--dismissed');
         });
     };
 
-    mr.alerts = {
-        documentReady : documentReady        
-    };
-
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.alerts.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -492,7 +506,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.backgrounds = mr.backgrounds || {};
+    
+    mr.backgrounds.documentReady = function($){
         
         //////////////// Append .background-image-holder <img>'s as CSS backgrounds
 
@@ -502,11 +518,7 @@ mr = (function (mr, $, window, document){
 	    });
     };
 
-    mr.backgrounds = {
-        documentReady : documentReady        
-    };
-
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.backgrounds.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -515,7 +527,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.bars = mr.bars || {};
+    
+    mr.bars.documentReady = function($){
         $('.nav-container .bar[data-scroll-class*="fixed"]:not(.bar--absolute)').each(function(){
             var bar = $(this),
                 barHeight = bar.outerHeight(true);
@@ -523,11 +537,7 @@ mr = (function (mr, $, window, document){
         });
     };
 
-    mr.bars = {
-        documentReady : documentReady        
-    };
-
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.bars.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -585,20 +595,22 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.countdown = mr.countdown || {};
+    mr.countdown.options = mr.countdown.options || {};
+
+    mr.countdown.documentReady = function($){
 
         $('.countdown[data-date]').each(function(){
             var element      = $(this),
                 date         = element.attr('data-date'),
-                daysText     = "days",
+                daysText     = typeof element.attr('data-days-text') !== typeof undefined ? '%D '+element.attr('data-days-text')+' %H:%M:%S': '%D days %H:%M:%S',
+                daysText     = typeof mr.countdown.options.format !== typeof undefined ? mr.countdown.options.format : daysText,
+                dateFormat   = typeof element.attr('data-date-format') !== typeof undefined ? element.attr('data-date-format'): daysText,
+                
                 fallback;
 
             if(typeof element.attr('data-date-fallback') !== typeof undefined){
-                fallback = element.attr('data-date-fallback');
-            }
-
-            if(typeof element.attr('data-days-text') !== typeof undefined){
-                daysText = element.attr('data-days-text');
+                fallback = element.attr('data-date-fallback') || "Timer Done";
             }
 
             element.countdown(date, function(event) {
@@ -606,7 +618,7 @@ mr = (function (mr, $, window, document){
                     element.text(fallback);
                 }else{
                     element.text(
-                      event.strftime('%D '+daysText+' %H:%M:%S')
+                      event.strftime(dateFormat)
                     );
                 }
             });
@@ -614,11 +626,7 @@ mr = (function (mr, $, window, document){
         
     };
 
-    mr.countdown = {
-      documentReady : documentReady        
-    };
-
-    mr.components.documentReadyDeferred.push(documentReady);
+    mr.components.documentReadyDeferred.push(mr.countdown.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -626,14 +634,18 @@ mr = (function (mr, $, window, document){
 //////////////// Datepicker
 mr = (function (mr, $, window, document){
     "use strict";
+    
+    mr.datepicker = mr.datepicker || {};
 
-    var documentReady = function($){
+    var options = mr.datepicker.options || {};
+    
+    mr.datepicker.documentReady = function($){
         if($('.datepicker').length){
-            $('.datepicker').pickadate();
+            $('.datepicker').pickadate(options);
         }
     };
 
-    mr.components.documentReadyDeferred.push(documentReady);
+    mr.components.documentReadyDeferred.push(mr.datepicker.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -641,10 +653,12 @@ mr = (function (mr, $, window, document){
 //////////////// Dropdowns
 mr = (function (mr, $, window, document){
     "use strict";
-    mr.dropdowns = {};
+    
+    mr.dropdowns = mr.dropdowns || {};
+
     mr.dropdowns.done = false;
     
-    var documentReady = function($){
+    mr.dropdowns.documentReady = function($){
 
         var rtl = false;
 
@@ -653,7 +667,7 @@ mr = (function (mr, $, window, document){
         }
 
         if(!mr.dropdowns.done){
-            jQuery(document).on('click','body:not(.dropdowns--hover) .dropdown:not(.dropdown--hover), body.dropdowns--hover .dropdown.dropdown--click',function(event){
+            jQuery(document).on('click','body:not(.dropdowns--hover) .dropdown, body.dropdowns--hover .dropdown.dropdown--click',function(event){
                 var dropdown = jQuery(this);
                 if(jQuery(event.target).is('.dropdown--active > .dropdown__trigger')){
                     dropdown.siblings().removeClass('dropdown--active').find('.dropdown').removeClass('dropdown--active');
@@ -682,18 +696,18 @@ mr = (function (mr, $, window, document){
 
             // Menu dropdown positioning
             if(rtl === false){
-                repositionDropdowns($);
-                jQuery(window).on('resize', function(){repositionDropdowns($);});
+                mr.dropdowns.repositionDropdowns($);
+                jQuery(window).on('resize', function(){mr.dropdowns.repositionDropdowns($);});
             }else{
-                repositionDropdownsRtl($);
-                jQuery(window).on('resize', function(){repositionDropdownsRtl($);});
+                mr.dropdowns.repositionDropdownsRtl($);
+                jQuery(window).on('resize', function(){mr.dropdowns.repositionDropdownsRtl($);});
             }
 
             mr.dropdowns.done = true;
         }
     };
 
-    function repositionDropdowns($){
+    mr.dropdowns.repositionDropdowns = function($){
         $('.dropdown__container').each(function(){
             var container, containerOffset, masterOffset, menuItem, content;
 
@@ -707,7 +721,7 @@ mr = (function (mr, $, window, document){
                 
                 container.css('left',((-containerOffset)+(masterOffset)));
 
-                if(container.find('.dropdown__content:not([class*="md-12"])').length){
+                if(container.find('.dropdown__content:not([class*="lg-12"])').length){
                     content = container.find('.dropdown__content');
                     content.css('left', ((menuItem)-(masterOffset)));
                 }
@@ -728,9 +742,9 @@ mr = (function (mr, $, window, document){
             }
 
         });
-    }
+    };
 
-    function repositionDropdownsRtl($){
+    mr.dropdowns.repositionDropdownsRtl = function($){
 
         var windowWidth = jQuery(window).width();
 
@@ -747,7 +761,7 @@ mr = (function (mr, $, window, document){
                 
                 container.css('right',((-containerOffset)+(masterOffset)));
 
-                if(container.find('.dropdown__content:not([class*="md-12"])').length){
+                if(container.find('.dropdown__content:not([class*="lg-12"])').length){
                     content = container.find('.dropdown__content');
                     content.css('right', ((menuItem)-(masterOffset)));
                 }
@@ -767,12 +781,10 @@ mr = (function (mr, $, window, document){
             }
 
         });
-    }
-
-    mr.dropdowns.documentReady = documentReady;
+    };
     
 
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.dropdowns.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -782,12 +794,12 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    mr.forms = {};
+    mr.forms                 = mr.forms || {};
     mr.forms.captcha         = {};
     mr.forms.captcha.widgets = [];
     mr.forms.captcha.done    = false;
 
-    var documentReady = function($){
+    mr.forms.documentReady = function($){
 
         mr.forms.captcha.widgets = [];
 
@@ -872,7 +884,7 @@ mr = (function (mr, $, window, document){
                 // Create a captcha div and insert it before the submit button.
                 $insertBefore = $thisForm.find('button[type=submit]').closest('[class*="col-"]');
                 $captchaDiv   = jQuery('<div>').addClass('recaptcha');
-                $column       = jQuery('<div>').addClass('col-xs-12').append($captchaDiv);
+                $column       = jQuery('<div>').addClass('col-12').append($captchaDiv);
                 $column.insertBefore($insertBefore);
             }
 
@@ -908,11 +920,6 @@ mr = (function (mr, $, window, document){
 
 
     };
-
-    mr.forms.documentReady = documentReady;
-
-   
-
     
     mr.forms.submit = function(e){
         // return false so form submits through jQuery rather than reloading page.
@@ -1198,7 +1205,7 @@ mr = (function (mr, $, window, document){
 
     mr.forms.captcha.renderWidgets = function(){
         mr.forms.captcha.widgets.forEach(function(widget){
-            if(widget.element.innerHTML === ''){
+            if(widget.element.innerHTML.replace(/[\s\xA0]+/g,'') === ''){
                 widget.id = grecaptcha.render(widget.element, {
                     'sitekey' : mr.forms.captcha.sitekey,
                     'theme' : widget.theme,
@@ -1220,7 +1227,7 @@ mr = (function (mr, $, window, document){
         jQuery('div.recaptcha.field-error').removeClass('field-error');
     };
 
-    mr.components.documentReadyDeferred.push(documentReady);
+    mr.components.documentReadyDeferred.push(mr.forms.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -1229,16 +1236,22 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.granim = mr.granim || {};
+
+    mr.granim.documentReady = function($){
     	$('[data-gradient-bg]').each(function(index,element){
     		var granimParent = $(this),
     			granimID 	 = 'granim-'+index+'',
 				colours 	 = granimParent.attr('data-gradient-bg'),
 				pairs        = [],
 				tempPair     = [],
+                ao           = {},
 				count,
 				passes,
-				i;
+				i,
+                themeDefaults,
+                
+                options;
 
 			// Canvas element forms the gradient background
 			granimParent.prepend('<canvas id="'+granimID+'"></canvas>');
@@ -1260,29 +1273,36 @@ mr = (function (mr, $, window, document){
                     tempPair.push(colours.shift());
                     pairs.push(tempPair);
             	}
+                
+                // attribute overrides - allows per-gradient override of global options.
+                ao.states = {
+                    "default-state": {
+                        gradients: pairs
+                    }
+                }
             }
 
+            themeDefaults = {
+                element: '#'+granimID,
+                name: 'basic-gradient',
+                direction: 'left-right',
+                opacity: [1, 1],
+                isPausedWhenNotInView: true,
+                states : {
+                    "default-state": {
+                        gradients: pairs
+                    }
+                }
+            };
+            
+            options = jQuery.extend({}, themeDefaults, mr.granim.options, ao);
+            $(this).data('gradientOptions', options);
     		var granimElement = $(this);
-    		var granimInstance = new Granim({
-			    element: '#'+granimID,
-			    name: 'basic-gradient',
-			    direction: 'left-right',
-			    opacity: [1, 1],
-			    isPausedWhenNotInView: true,
-			    states : {
-			        "default-state": {
-			            gradients: pairs
-			        }
-			    }
-			});
+    		var granimInstance = new Granim(options);
     	});        
     };
 
-    mr.granim = {
-      documentReady : documentReady        
-    };
-
-    mr.components.documentReadyDeferred.push(documentReady);
+    mr.components.documentReadyDeferred.push(mr.granim.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -1291,7 +1311,11 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.instagram = mr.instagram || {};
+
+    mr.instagram.documentReady = function($){
+
+        var themeDefaults, options, ao = {};
         
         if($('.instafeed').length){
 
@@ -1318,22 +1342,24 @@ mr = (function (mr, $, window, document){
             var feed   = $(this),
                 feedID = feed.attr('data-user-name'),
                 fetchNumber = 12;
-            if(typeof feed.attr('data-amount') !== typeof undefined){
-                fetchNumber = parseInt(feed.attr('data-amount'), 10);
-            }
+            
+            themeDefaults = {
+                query: 'mediumrarethemes',
+                max: 12
+            };
+
+            // Attribute Overrides taken from data attributes allow for per-feed customization
+            ao.max = feed.attr('data-amount')
+            ao.query = feed.attr('data-user-name');
+
+            options = jQuery.extend({}, themeDefaults, mr.instagram.options, ao);
+
             feed.append('<ul></ul>');
-            feed.children('ul').spectragram('getUserFeed', {
-                query: feedID,
-                max: fetchNumber
-            });
+            feed.children('ul').spectragram('getUserFeed', options);
         });
     };
 
-    mr.instagram = {
-        documentReady : documentReady        
-    };
-
-    mr.components.documentReadyDeferred.push(documentReady);
+    mr.components.documentReadyDeferred.push(mr.instagram.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -1342,9 +1368,10 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    mr.maps = {};
+    mr.maps = mr.maps || {};
+    mr.maps.options = mr.maps.options || {};
 
-    var documentReady = function($){
+    mr.maps.documentReady = function($){
         // Interact with Map once the user has clicked (to prevent scrolling the page = zooming the map
 
         $('.map-holder').on('click', function() {
@@ -1359,7 +1386,6 @@ mr = (function (mr, $, window, document){
         }
         
     };
-    mr.maps.documentReady = documentReady;
 
     mr.maps.initAPI = function($){
         // Load Google MAP API JS with callback to initialise when fully loaded
@@ -1381,13 +1407,14 @@ mr = (function (mr, $, window, document){
     mr.maps.init = function(){
         if(typeof window.google !== "undefined"){
             if(typeof window.google.maps !== "undefined"){
+
+                mr.maps.instances = [];
+
                 
                 jQuery('.gmaps-active').each(function(){
                     var mapElement      = this,
                         mapInstance     = jQuery(this),
-                        mapJSON         = typeof mapInstance.attr('data-map-style') !== typeof undefined ? mapInstance.attr('data-map-style'): false,
-                        mapStyle        = JSON.parse(mapJSON) || [{"featureType":"landscape","stylers":[{"saturation":-100},{"lightness":65},{"visibility":"on"}]},{"featureType":"poi","stylers":[{"saturation":-100},{"lightness":51},{"visibility":"simplified"}]},{"featureType":"road.highway","stylers":[{"saturation":-100},{"visibility":"simplified"}]},{"featureType":"road.arterial","stylers":[{"saturation":-100},{"lightness":30},{"visibility":"on"}]},{"featureType":"road.local","stylers":[{"saturation":-100},{"lightness":40},{"visibility":"on"}]},{"featureType":"transit","stylers":[{"saturation":-100},{"visibility":"simplified"}]},{"featureType":"administrative.province","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"on"},{"lightness":-25},{"saturation":-100}]},{"featureType":"water","elementType":"geometry","stylers":[{"hue":"#ffff00"},{"lightness":-25},{"saturation":-97}]}],
-                        zoomLevel       = (typeof mapInstance.attr('data-map-zoom') !== typeof undefined && mapInstance.attr('data-map-zoom') !== "") ? mapInstance.attr('data-map-zoom') * 1: 17,
+                        isDraggable     = jQuery(document).width() > 766 ? true : false,
                         showZoomControl = typeof mapInstance.attr('data-zoom-controls') !== typeof undefined ? true : false,
                         zoomControlPos  = typeof mapInstance.attr('data-zoom-controls') !== typeof undefined ? mapInstance.attr('data-zoom-controls'): false,
                         latlong         = typeof mapInstance.attr('data-latlong') !== typeof undefined ? mapInstance.attr('data-latlong') : false,
@@ -1395,58 +1422,69 @@ mr = (function (mr, $, window, document){
                         longitude       = latlong ? 1 * latlong.substr(latlong.indexOf(",") + 1) : false,
                         geocoder        = new google.maps.Geocoder(),
                         address         = typeof mapInstance.attr('data-address') !== typeof undefined ? mapInstance.attr('data-address').split(';'): [""],
-                        markerImage     = typeof mapInstance.attr('data-marker-image') !== typeof undefined ? mapInstance.attr('data-marker-image'): 'img/mapmarker.png',
-                        markerTitle     = "We Are Here",
-                        isDraggable     = jQuery(document).width() > 766 ? true : false,
-                        map, marker,
-                        mapOptions = {
-                            draggable: isDraggable,
-                            scrollwheel: false,
-                            zoom: zoomLevel,
-                            disableDefaultUI: true,
-                            zoomControl: showZoomControl,
-                            zoomControlOptions: zoomControlPos !== false ? {position: google.maps.ControlPosition[zoomControlPos]} : null,
-                            styles: mapStyle
-                        };
-                        console.log(mapOptions);
+                        map, marker, markerDefaults,mapDefaults,mapOptions, markerOptions, mapAo = {}, markerAo = {}, mapCreatedEvent;
 
-                    if(typeof mapInstance.attr('data-marker-title') !== typeof undefined && mapInstance.attr('data-marker-title') !== "" )
-                    {
-                        markerTitle = mapInstance.attr('data-marker-title');
-                    }
+                        mapCreatedEvent    = document.createEvent('Event');
+                        mapCreatedEvent.initEvent('mapCreated.maps.mr', true, true);
+
+                        
+                    
+
+                    mapDefaults = {
+                        disableDefaultUI: true,
+                        draggable: isDraggable,
+                        scrollwheel: false,
+                        styles: [{"featureType":"landscape","stylers":[{"saturation":-100},{"lightness":65},{"visibility":"on"}]},{"featureType":"poi","stylers":[{"saturation":-100},{"lightness":51},{"visibility":"simplified"}]},{"featureType":"road.highway","stylers":[{"saturation":-100},{"visibility":"simplified"}]},{"featureType":"road.arterial","stylers":[{"saturation":-100},{"lightness":30},{"visibility":"on"}]},{"featureType":"road.local","stylers":[{"saturation":-100},{"lightness":40},{"visibility":"on"}]},{"featureType":"transit","stylers":[{"saturation":-100},{"visibility":"simplified"}]},{"featureType":"administrative.province","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"on"},{"lightness":-25},{"saturation":-100}]},{"featureType":"water","elementType":"geometry","stylers":[{"hue":"#ffff00"},{"lightness":-25},{"saturation":-97}]}],
+                        zoom: 17,
+                        zoomControl: false,    
+                    };
+
+                    // Attribute overrides - allows data attributes on the map to override global options
+                    mapAo.styles             = typeof mapInstance.attr('data-map-style') !== typeof undefined ? JSON.parse(mapInstance.attr('data-map-style')): undefined;
+                    mapAo.zoom               = mapInstance.attr('data-map-zoom') ? parseInt(mapInstance.attr('data-map-zoom'),10) : undefined;
+                    mapAo.zoomControlOptions = zoomControlPos !== false ? {position: google.maps.ControlPosition[zoomControlPos]} : undefined;
+
+                    markerDefaults = {
+                        icon: {url:( typeof mr_variant !== typeof undefined ? '../': '' )+'img/mapmarker.png', scaledSize: new google.maps.Size(50,50)},
+                        title: 'We Are Here',
+                        optimised: false
+                    };
+
+                    markerAo.icon = typeof mapInstance.attr('data-marker-image') !== typeof undefined ? {url: mapInstance.attr('data-marker-image'), scaledSize: new google.maps.Size(50,50)} : undefined;
+                    markerAo.title = mapInstance.attr('data-marker-title');
+
+                    mapOptions = jQuery.extend({}, mapDefaults, mr.maps.options.map, mapAo);
+                    markerOptions = jQuery.extend({}, markerDefaults, mr.maps.options.marker, markerAo);
+                    
 
                     if(address !== undefined && address[0] !== ""){
                             geocoder.geocode( { 'address': address[0].replace('[nomarker]','')}, function(results, status) {
                                 if (status === google.maps.GeocoderStatus.OK) {
-                                var map = new google.maps.Map(mapElement, mapOptions); 
+                                map = new google.maps.Map(mapElement, mapOptions);
+
+
+                                mr.maps.instances.push(map);
+                                jQuery(mapElement).trigger('mapCreated.maps.mr').get(0).dispatchEvent(mapCreatedEvent);
                                 map.setCenter(results[0].geometry.location);
                                 
                                 address.forEach(function(address){
                                     var markerGeoCoder;
-                                    
-                                    markerImage = {url: typeof window.mr_variant === typeof undefined ? typeof markerImage !== "object" ? markerImage: markerImage.url : '../img/mapmarker.png', scaledSize: new google.maps.Size(50,50)};
 
                                     if(/(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)/.test(address) ){
                                         var latlong = address.split(','),
-                                        marker = new google.maps.Marker({
+                                        marker = new google.maps.Marker(jQuery.extend({}, markerOptions, {
                                                         position: { lat: 1*latlong[0], lng: 1*latlong[1] },
                                                         map: map,
-                                                        icon: markerImage,
-                                                        title: markerTitle,
-                                                        optimised: false
-                                                    });
+                                                    }));
                                     }
                                     else if(address.indexOf('[nomarker]') < 0){
                                         markerGeoCoder = new google.maps.Geocoder();
                                         markerGeoCoder.geocode( { 'address': address.replace('[nomarker]','')}, function(results, status) {
                                             if (status === google.maps.GeocoderStatus.OK) {
-                                                marker = new google.maps.Marker({
+                                                marker = new google.maps.Marker(jQuery.extend({}, markerOptions, {
                                                     map: map,
-                                                    icon: markerImage,
-                                                    title: markerTitle,
                                                     position: results[0].geometry.location,
-                                                    optimised: false
-                                                });
+                                                }));
                                             }
                                             else{
                                                 console.log('Map marker error: '+status);
@@ -1461,23 +1499,26 @@ mr = (function (mr, $, window, document){
                         });
                     }
                     else if(typeof latitude !== typeof undefined && latitude !== "" && latitude !== false && typeof longitude !== typeof undefined && longitude !== "" && longitude !== false ){
+                        
                         mapOptions.center   = { lat: latitude, lng: longitude};
-                        map                 = new google.maps.Map(mapInstance, mapOptions); 
-                        marker              = new google.maps.Marker({
+                        map                 = new google.maps.Map(mapElement, mapOptions); 
+                        marker              = new google.maps.Marker(jQuery.extend({}, markerOptions, {
                                                     position: { lat: latitude, lng: longitude },
-                                                    map: map,
-                                                    icon: markerImage,
-                                                    title: markerTitle
-                                                });
+                                                    map: map }));
+                        mr.maps.instances.push(map);
+                        jQuery(mapElement).trigger('mapCreated.maps.mr').get(0).dispatchEvent(mapCreatedEvent);
+
 
                     }
+
+                    
 
                 }); 
             }
         }
     };
 
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.maps.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -1487,7 +1528,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.masonry = mr.masonry || {};
+
+    mr.masonry.documentReady = function($){
 
         mr.masonry.updateFilters();
 
@@ -1513,12 +1556,21 @@ mr = (function (mr, $, window, document){
         
     };
 
-    var windowLoad = function(){
+    mr.masonry.windowLoad = function(){
 
         $('.masonry').each(function(){
             var masonry       = $(this).find('.masonry__container'),
                 masonryParent = $(this),
-                defaultFilter = '*';
+                defaultFilter = '*',
+                themeDefaults, ao = {};
+
+            themeDefaults = {
+                itemSelector: '.masonry__item',
+                filter: '*',
+                masonry: {
+                  columnWidth: '.masonry__item'
+                }
+            };
 
             // Check for a default filter attribute
             if(masonryParent.is('[data-default-filter]')){
@@ -1528,6 +1580,9 @@ mr = (function (mr, $, window, document){
                 masonryParent.find('li[data-masonry-filter="'+masonryParent.attr("data-default-filter").toLowerCase()+'"]').addClass('active');
             }
 
+            // Use data attributes to override the default settings and provide a per-masonry customisation where necessary.
+            ao.filter = defaultFilter !== '*' ? defaultFilter : undefined;
+
             masonry.on('layoutComplete',function(){
                 masonry.addClass('masonry--active');
                 if(typeof mr_parallax !== typeof undefined){
@@ -1535,21 +1590,10 @@ mr = (function (mr, $, window, document){
                 }
             });
 
-            masonry.isotope({
-              itemSelector: '.masonry__item',
-              filter: defaultFilter,
-              masonry: {
-                columnWidth: '.masonry__item'
-              }
-            });
+            
+            masonry.isotope(jQuery.extend({}, themeDefaults, mr.masonry.options, ao));
 
         });
-    };
-
-    
-    mr.masonry = {
-        documentReady : documentReady,
-        windowLoad : windowLoad        
     };
 
     mr.masonry.updateFilters = function(masonry){
@@ -1591,7 +1635,7 @@ mr = (function (mr, $, window, document){
                             // Split tags from string into array 
                             filtersArray = filterString.split(',');
                         }
-                        jQuery(filtersArray).each(function(index, tag){
+                        $(filtersArray).each(function(index, tag){
 
                             // Slugify the tag
 
@@ -1607,6 +1651,18 @@ mr = (function (mr, $, window, document){
                                 
                             }
                         }); 
+                    });
+                    
+                    // Remove any unnused filter options in list
+                    filtersList.find('[data-masonry-filter]').each(function(){
+                        var $this  = $(this),
+                            filter = $this.text();
+                        
+                        if($(this).attr('data-masonry-filter') !== "*"){
+                            if(!$masonry.find('.masonry__item[data-masonry-filter*="'+filter+'"]').length){
+                                $this.remove();
+                            }
+                        }
                     });
 
                     mr.util.sortChildrenByText($(this).find('.masonry__filters ul'));
@@ -1646,8 +1702,8 @@ mr = (function (mr, $, window, document){
         });
     };
 
-    mr.components.documentReady.push(documentReady);
-    mr.components.windowLoad.push(windowLoad);
+    mr.components.documentReady.push(mr.masonry.documentReady);
+    mr.components.windowLoad.push(mr.masonry.windowLoad);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -1657,9 +1713,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    mr.modals = {};
+    mr.modals = mr.modals || {};
 
-    var documentReady = function($){
+    mr.modals.documentReady = function($){
         var allPageModals = "<div class=\"all-page-modals\"></div>",
             mainContainer = $('div.main-container');
 
@@ -1756,7 +1812,7 @@ mr = (function (mr, $, window, document){
             }
         });
 
-        $('.modal-container').on('click', function(e) { 
+        $('.modal-container:not(.modal--prevent-close)').on('click', function(e) { 
             if( e.target !== this ) return;
             mr.modals.closeActiveModal();
         });
@@ -1818,8 +1874,10 @@ mr = (function (mr, $, window, document){
 
         jQuery(document).on('click','a[href^="#"]', function(){
             var modalID = $(this).attr('href').replace('#', '');
-            mr.modals.closeActiveModal();
-            setTimeout(mr.modals.showModal, 500,'[data-modal-id="'+modalID+'"]', 0);
+            if($('[data-modal-id="'+modalID+'"]').length){    
+                mr.modals.closeActiveModal();
+                setTimeout(mr.modals.showModal, 500,'[data-modal-id="'+modalID+'"]', 0);
+            }
         });
 
         // Make modal scrollable
@@ -1833,18 +1891,18 @@ mr = (function (mr, $, window, document){
     //////////////// End documentReady
     ////////////////
 
-    mr.modals.documentReady = documentReady;
-
     mr.modals.showModal = function(modal, millisecondsDelay){
         
-        var delay = (typeof millisecondsDelay !== typeof undefined) ? (1*millisecondsDelay) : 0;
-        
-        setTimeout(function(){
-            var openEvent = document.createEvent('Event');
-            openEvent.initEvent('modalOpened.modals.mr', true, true);
-            $(modal).addClass('modal-active').trigger('modalOpened.modals.mr').get(0).dispatchEvent(openEvent);
+        var delay = (typeof millisecondsDelay !== typeof undefined) ? (1*millisecondsDelay) : 0, $modal = $(modal);
+            
+        if($modal.length){
+            setTimeout(function(){
+                var openEvent = document.createEvent('Event');
+                openEvent.initEvent('modalOpened.modals.mr', true, true);
+                $(modal).addClass('modal-active').trigger('modalOpened.modals.mr').get(0).dispatchEvent(openEvent);
 
-        },delay);
+            },delay);
+        }
     };
 
     mr.modals.closeActiveModal = function(){
@@ -1877,7 +1935,7 @@ mr = (function (mr, $, window, document){
         }
     };
 
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.modals.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -1886,9 +1944,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    mr.newsletters = {};
+    mr.newsletters = mr.newsletters || {};
 
-    var documentReady = function($){
+    mr.newsletters.documentReady = function($){
   
   	var form,checkbox,label,id,parent,radio;
     
@@ -2076,9 +2134,6 @@ mr = (function (mr, $, window, document){
 
         mr.newsletters.prepareAjaxAction(form);
 
-     
-    
-
     }); 
 
 	// Reinitialize the forms so interactions work as they should
@@ -2086,8 +2141,6 @@ mr = (function (mr, $, window, document){
 	mr.forms.documentReady(mr.setContext('form.form--active'));
 		
   };
-
-  mr.newsletters.documentReady = documentReady;
 
   mr.newsletters.prepareAjaxAction = function(form){
         var action = $(form).attr('action');
@@ -2112,7 +2165,7 @@ mr = (function (mr, $, window, document){
 
 
 
-  mr.components.documentReady.push(documentReady);
+  mr.components.documentReady.push(mr.newsletters.documentReady);
   return mr;
 
 }(mr, jQuery, window, document));
@@ -2121,9 +2174,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    mr.notifications = {};
+    mr.notifications = mr.notifications || {};
 
-    var documentReady = function($){
+    mr.notifications.documentReady = function($){
         
         $('.notification').each(function(){
             var notification = $(this);
@@ -2172,8 +2225,7 @@ mr = (function (mr, $, window, document){
         });
     
     };
-    
-    mr.notifications.documentReady = documentReady;
+
 
     mr.notifications.showNotification = function(notification, millisecondsDelay){
         var $notification = jQuery(notification),
@@ -2221,7 +2273,7 @@ mr = (function (mr, $, window, document){
         }
     };
 
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.notifications.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -2230,9 +2282,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    mr.parallax = {};
+    mr.parallax = mr.parallax || {};
 
-    var documentReady = function($){
+    mr.parallax.documentReady = function($){
         
         var $window      = $(window); 
         var windowWidth  = $window.width();
@@ -2248,10 +2300,7 @@ mr = (function (mr, $, window, document){
                 parallaxHeroImage.css('height', windowHeight + navHeight);
             }
         }
-    };
-
-    
-    mr.parallax.documentReady = documentReady;        
+    };     
     
     mr.parallax.update = function(){
         if(typeof mr_parallax !== typeof undefined){
@@ -2260,7 +2309,7 @@ mr = (function (mr, $, window, document){
         }
     };
 
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.parallax.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -2269,7 +2318,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.progressHorizontal = mr.progressHorizontal || {};
+
+    mr.progressHorizontal.documentReady = function($){
 
         var progressBars = [];
 
@@ -2295,11 +2346,7 @@ mr = (function (mr, $, window, document){
         });
     };
 
-    mr.progressHorizontal = {
-        documentReady : documentReady        
-    };
-
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.progressHorizontal.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -2308,71 +2355,56 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
 	  "use strict";
 
-		mr.easypiecharts = {};
+		mr.easypiecharts = mr.easypiecharts || {};
 		mr.easypiecharts.pies = [];
+		mr.easypiecharts.options = mr.easypiecharts.options || {};
 
-		var documentReady = function($){
-
-			mr.easypiecharts.init = function(){
-
-				mr.easypiecharts.pies = [];
-            
-				$('.radial').each(function(){
-				  var pieObject  = {},
-					  currentPie = jQuery(this);
-
-					  pieObject.element = currentPie;
-					  pieObject.value = parseInt(currentPie.attr('data-value'),10);
-					  pieObject.top = currentPie.offset().top;
-					  pieObject.height = currentPie.height()/2;
-					  pieObject.active = false;
-					  mr.easypiecharts.pies.push(pieObject);
-				});
-			};
-
-			mr.easypiecharts.activate = function(){
-				mr.easypiecharts.pies.forEach(function(pie){
-					if(Math.round((mr.scroll.y + mr.window.height)) >= Math.round(pie.top+pie.height)){
-						if(pie.active === false){
-							
-		                	pie.element.data('easyPieChart').enableAnimation();
-		                	pie.element.data('easyPieChart').update(pie.value);
-		                	pie.element.addClass('radial--active');
-		                	pie.active = true;
-						}
-		            }
-	        	});
-			};
+		mr.easypiecharts.documentReady = function($){
 
 		  	$('.radial').each(function(){
-		  		var chart    = jQuery(this),
-		  			value    = 0,
-		  			color    = '#000000',
-		  			time     = 2000,
-		  			pieSize  = 110,
-		  			barWidth = 3;
+		  		var chart              = jQuery(this),
+		  			  value              = 0,
+		  			  color              = '#000000',
+		  			  time               = 2000,
+		  			  pieSize            = 110,
+		  			  barWidth           = 3,
+		  			  defaults           = {},
+		  			  attributeOverrides = {},
+		  			  options;
 
-		  		if(typeof chart.attr('data-timing') !== typeof undefined){
-		  			time = chart.attr('data-timing')*1;
-		  		}
-		  		if(typeof chart.attr('data-color') !== typeof undefined){
-		  			color = chart.attr('data-color');
-		  		}
-		  		if(typeof chart.attr('data-size') !== typeof undefined){
-		  			pieSize = chart.attr('data-size');
-		  		}
-		  		if(typeof chart.attr('data-bar-width') !== typeof undefined){
-		  			barWidth = chart.attr('data-bar-width');
-		  		}
-		  		chart.css('height',pieSize).css('width',pieSize);
-
-		  		chart.easyPieChart({
+		  		defaults = {
 		  			animate: ({duration: time, enabled: true}),
 		  			barColor: color,
 		  			scaleColor: false,
 		  			size: pieSize,
 		  			lineWidth: barWidth
-		  		});
+		  		};
+
+		  		if(typeof mr.easypiecharts.options.size !== typeof undefined){
+            pieSize = mr.easypiecharts.options.size;
+		  		}
+		  		if(typeof chart.attr('data-timing') !== typeof undefined){
+		  			attributeOverrides.animate = {duration: parseInt(chart.attr('data-timing'), 10), enabled: true};
+		  		}
+		  		if(typeof chart.attr('data-color') !== typeof undefined){
+		  			attributeOverrides.barColor = chart.attr('data-color');
+		  		}
+		  		if(typeof chart.attr('data-size') !== typeof undefined){
+		  			pieSize = attributeOverrides.size = parseInt(chart.attr('data-size'), 10);
+		  		}
+		  		if(typeof chart.attr('data-bar-width') !== typeof undefined){
+		  			attributeOverrides.lineWidth = parseInt(chart.attr('data-bar-width'), 10);
+		  		}
+
+		  		chart.css('height',pieSize).css('width',pieSize);
+
+          
+
+		  		if(typeof mr.easypiecharts.options === 'object'){
+            options = jQuery.extend({}, defaults, mr.easypiecharts.options, attributeOverrides);
+		  		}
+
+		  		chart.easyPieChart(options);
 		  		chart.data('easyPieChart').update(0);
 		  	});
 
@@ -2384,9 +2416,38 @@ mr = (function (mr, $, window, document){
 
 	  };
 
-	  mr.easypiecharts.documentReady = documentReady;
+	  mr.easypiecharts.init = function(){
 
-	  mr.components.documentReadyDeferred.push(documentReady);
+			mr.easypiecharts.pies = [];
+          
+			$('.radial').each(function(){
+			  var pieObject  = {},
+				  currentPie = jQuery(this);
+
+				  pieObject.element = currentPie;
+				  pieObject.value = parseInt(currentPie.attr('data-value'),10);
+				  pieObject.top = currentPie.offset().top;
+				  pieObject.height = currentPie.height()/2;
+				  pieObject.active = false;
+				  mr.easypiecharts.pies.push(pieObject);
+			});
+		};
+
+		mr.easypiecharts.activate = function(){
+			mr.easypiecharts.pies.forEach(function(pie){
+				if(Math.round((mr.scroll.y + mr.window.height)) >= Math.round(pie.top+pie.height)){
+					if(pie.active === false){
+						
+	                	pie.element.data('easyPieChart').enableAnimation();
+	                	pie.element.data('easyPieChart').update(pie.value);
+	                	pie.element.addClass('radial--active');
+	                	pie.active = true;
+					}
+	            }
+        	});
+		};
+
+	  mr.components.documentReadyDeferred.push(mr.easypiecharts.documentReady);
 	  return mr;
 
 }(mr, jQuery, window, document));
@@ -2395,10 +2456,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    mr.sliders = {};
-    mr.sliders.draggable = true;
+    mr.sliders = mr.sliders || {};
 
-    var documentReady = function($){
+    mr.sliders.documentReady = function($){
 
         $('.slider').each(function(index){
             
@@ -2407,38 +2467,39 @@ mr = (function (mr, $, window, document){
             sliderInitializer.find('>li').addClass('slide');
             var childnum = sliderInitializer.find('li').length;
             
-            var arrows = slider.attr('data-arrows') === 'true'? true: false;
+            var themeDefaults = {
+                cellSelector: '.slide',
+                cellAlign: 'left',
+                wrapAround: true,
+                pageDots: false,
+                prevNextButtons: false,
+                autoPlay: true,
+                draggable: (childnum < 2 ? false: true),
+                imagesLoaded: true,
+                accessibility: true,
+                rightToLeft: false,
+                initialIndex: 0,
+                freeScroll: false
+            }; 
 
-            var paging = (slider.attr('data-paging') === 'true' && sliderInitializer.find('li').length > 1) ? true : false;
-            var timing = slider.attr('data-timing') ? parseInt(slider.attr('data-timing'), 10): 7000;
-            var autoplay = slider.attr('data-autoplay') === 'false'? false: true;
-            var draggable = slider.attr('data-draggable') === 'false'? false : mr.sliders.draggable;
-            var accessibility = slider.attr('data-accessibility') === 'false'? false : true;
-            var rightToLeft = slider.attr('data-rtl') === 'true'? true : false;
-            var initialIndex = slider.attr('data-initial') ? parseInt(slider.attr('data-initial'), 10) : 0;
-            var freeScroll = slider.attr('data-freescroll') === "true" ? true: false;
+            // Attribute Overrides - options that are overridden by data attributes on the slider element
+            var ao = {};
+            ao.pageDots = (slider.attr('data-paging') === 'true' && sliderInitializer.find('li').length > 1) ? true : undefined;
+            ao.prevNextButtons = slider.attr('data-arrows') === 'true'? true: undefined;
+            ao.draggable = slider.attr('data-draggable') === 'false'? false : undefined;
+            ao.autoPlay = slider.attr('data-autoplay') === 'false'? false: (slider.attr('data-timing') ? parseInt(slider.attr('data-timing'), 10): undefined);
+            ao.accessibility = slider.attr('data-accessibility') === 'false'? false : undefined;
+            ao.rightToLeft = slider.attr('data-rtl') === 'true'? true : undefined;
+            ao.initialIndex = slider.attr('data-initial') ? parseInt(slider.attr('data-initial'), 10) : undefined;
+            ao.freeScroll = slider.attr('data-freescroll') === "true" ? true: undefined;
 
             // Set data attribute to inidicate the number of children in the slider
             slider.attr('data-children',childnum);
 
-            if(childnum < 2){
-                draggable = false;
-            }
+            
+            $(this).data('sliderOptions', jQuery.extend({}, themeDefaults, mr.sliders.options, ao));
 
-            $(sliderInitializer).flickity({
-                cellSelector: '.slide',
-                cellAlign: 'left',
-                wrapAround: true,
-                pageDots: paging,
-                prevNextButtons: arrows,
-                autoPlay: timing,
-                draggable: draggable,
-                imagesLoaded: true,
-                accessibility: accessibility,
-                rightToLeft: rightToLeft,
-                initialIndex: initialIndex,
-                freeScroll: freeScroll
-            });
+            $(sliderInitializer).flickity($(this).data('sliderOptions'));
 
             $(sliderInitializer).on( 'scroll.flickity', function( event, progress ) {
               if(slider.find('.is-selected').hasClass('controls--dark')){
@@ -2449,13 +2510,11 @@ mr = (function (mr, $, window, document){
             });
         });
 
-        mr.parallax.update();
+        if(mr.parallax.update){ mr.parallax.update(); }
         
     };
 
-    mr.sliders.documentReady = documentReady;
-
-    mr.components.documentReadyDeferred.push(documentReady);
+    mr.components.documentReadyDeferred.push(mr.sliders.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -2464,7 +2523,7 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    mr.smoothscroll = {};
+    mr.smoothscroll = mr.smoothscroll || {};
     mr.smoothscroll.sections = [];
     
     mr.smoothscroll.init = function(){
@@ -2512,9 +2571,17 @@ mr = (function (mr, $, window, document){
 
     mr.scroll.listeners.push(mr.smoothscroll.highlight);
 
-    var documentReady = function($){
+    mr.smoothscroll.documentReady = function($){
         // Smooth scroll to inner links
-        var innerLinks = $('a.inner-link');
+        var innerLinks = $('a.inner-link'), offset, themeDefaults, ao = {};
+
+        themeDefaults = {
+            selector: '.inner-link',
+            selectorHeader: null,
+            speed: 750,
+            easing: 'easeInOutCubic',
+            offset: 0
+        };
 
         if(innerLinks.length){
             innerLinks.each(function(index){
@@ -2528,25 +2595,19 @@ mr = (function (mr, $, window, document){
             mr.smoothscroll.init();
             $(window).on('resize', mr.smoothscroll.init);
 
-            var offset = 0;
+            offset = 0;
             if($('body[data-smooth-scroll-offset]').length){
                 offset = $('body').attr('data-smooth-scroll-offset');
                 offset = offset*1;
             }
+
+            ao.offset = offset !== 0 ? offset: undefined; 
             
-            smoothScroll.init({
-                selector: '.inner-link',
-                selectorHeader: null,
-                speed: 750,
-                easing: 'easeInOutCubic',
-                offset: offset
-            });
+            smoothScroll.init(jQuery.extend({}, themeDefaults, mr.smoothscroll.options, ao));
         }
     };
 
-    mr.smoothscroll.documentReady = documentReady;
-
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.smoothscroll.documentReady);
     mr.components.windowLoad.push(mr.smoothscroll.init);
     return mr;
 
@@ -2556,9 +2617,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
 
-    mr.tabs = {};
+    mr.tabs = mr.tabs || {};
     
-    var documentReady = function($){
+    mr.tabs.documentReady = function($){
         $('.tabs').each(function(){
             var tabs = $(this);
             tabs.after('<ul class="tabs-content">');
@@ -2632,13 +2693,14 @@ mr = (function (mr, $, window, document){
 
 
     mr.tabs.activateTabById = function(id){
-        if(id !== '' && id !== '#'){
-            $('.tabs > li#'+id.replace('#', '')).click();
+        if(id !== '' && id !== '#' && id.match(/#\/.*/) === null){
+            if($('.tabs > li#'+id.replace('#', '')).length){
+                $('.tabs > li#'+id.replace('#', '')).click();
+            }
         }
     };
 
-    mr.tabs.documentReady = documentReady;
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.tabs.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -2647,7 +2709,9 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.toggleClass = mr.toggleClass || {};
+    
+    mr.toggleClass.documentReady = function($){
         $('[data-toggle-class]').each(function(){
         	var element = $(this),
                 data    = element.attr('data-toggle-class').split("|");
@@ -2679,11 +2743,7 @@ mr = (function (mr, $, window, document){
         });
     };
 
-    mr.toggleClass = {
-        documentReady : documentReady        
-    };
-
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.toggleClass.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -2692,24 +2752,28 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.typed = mr.typed || {};
+    
+
+    mr.typed.documentReady = function($){
         $('.typed-text').each(function(){
             var text = $(this);
-            var strings = text.attr("data-typed-strings") ? text.attr("data-typed-strings").split(",") : [];
-            $(text).typed({
-                strings: strings,
-                typeSpeed: 100,
-                loop: true,
-                showCursor: false
-            });
+            var strings = text.attr("data-typed-strings") ? text.attr("data-typed-strings").split(",") : [],
+                themeDefaults = {
+                    strings: [],
+                    typeSpeed: 100,
+                    loop: true,
+                    showCursor: false
+                }, ao = {};
+
+            ao.strings = text.attr("data-typed-strings") ? text.attr("data-typed-strings").split(",") : undefined;
+
+            $(text).typed(jQuery.extend({}, themeDefaults, mr.typed.options, ao));
+            
         });
     };
 
-    mr.typed = {
-        documentReady : documentReady        
-    };
-
-    mr.components.documentReady.push(documentReady);
+    mr.components.documentReady.push(mr.typed.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -2718,14 +2782,18 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-    var documentReady = function($){
+    mr.twitter = mr.twitter || {};
+    mr.twitter.options = mr.twitter.options || {};
+
+    mr.twitter.documentReady = function($){
         $('.tweets-feed').each(function(index) {
             $(this).attr('id', 'tweets-' + index);
         }).each(function(index) {
             var element = $('#tweets-' + index);
+            
             var TweetConfig = {
                "domId": '',
-               "maxTweets": element.attr('data-amount'),
+               "maxTweets": 6,
                "enableLinks": true,
                "showUser": true,
                "showTime": true,
@@ -2734,13 +2802,21 @@ mr = (function (mr, $, window, document){
                "customCallback": handleTweets
             };
 
+            TweetConfig = jQuery.extend(TweetConfig, mr.twitter.options);
+           
+
+
             if(typeof element.attr('data-widget-id') !== typeof undefined){
                 TweetConfig.id = element.attr('data-widget-id');
             }else if(typeof element.attr('data-feed-name') !== typeof undefined && element.attr('data-feed-name') !== ""){
                 TweetConfig.profile = {"screenName": element.attr('data-feed-name').replace('@', '')};
+            }else if(typeof mr.twitter.options.profile !== typeof undefined){
+                TweetConfig.profile = {"screenName": mr.twitter.options.profile.replace('@', '')};
             }else{
                 TweetConfig.profile = {"screenName": 'twitter'};
             }
+
+            TweetConfig.maxTweets = element.attr('data-amount') ? element.attr('data-amount'): TweetConfig.maxTweets; 
 
             if(element.closest('.twitter-feed--slider').length){
                 element.addClass('slider');
@@ -2768,12 +2844,7 @@ mr = (function (mr, $, window, document){
         });
     };
 
-    mr.twitter = {
-        documentReady : documentReady
-    };
-
-    mr.components.documentReady.push(documentReady);
-
+    mr.components.documentReady.push(mr.twitter.documentReady);
     return mr;
 
 }(mr, jQuery, window, document));
@@ -2782,21 +2853,38 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-	  var documentReady = function($){
+    mr.video = mr.video || {};
+    mr.video.options = mr.video.options || {};
+    mr.video.options.ytplayer = mr.video.options.ytplayer || {};
+    
+	  mr.video.documentReady = function($){
 	      
 			//////////////// Youtube Background
 
 			if($('.youtube-background').length){
 				$('.youtube-background').each(function(){
-					var player = $(this);
-					var vidURL = $(this).attr('data-video-url');
-					var startAt = $(this).attr('data-start-at');
-					player.attr('data-property','{videoURL:"'+vidURL+'",containment:"self",autoPlay:true, mute:true, startAt:'+startAt+', opacity:1}');
+
+
+					var player = $(this),
+					
+					themeDefaults = {
+						containment: "self",
+						autoPlay: true,
+						mute: true,
+						opacity: 1
+					}, ao = {};
+
+          // Attribute overrides - provides overrides to the global options on a per-video basis
+					ao.videoURL = $(this).attr('data-video-url');
+					ao.startAt = $(this).attr('data-start-at')? parseInt($(this).attr('data-start-at'), 10): undefined;
+
+
 					player.closest('.videobg').append('<div class="loading-indicator"></div>');
-					player.YTPlayer();
+					player.YTPlayer(jQuery.extend({}, themeDefaults, mr.video.options.ytplayer, ao));
 					player.on("YTPStart",function(){
 				  		player.closest('.videobg').addClass('video-active');
 					});	
+
 				});
 			}
 
@@ -2831,11 +2919,7 @@ mr = (function (mr, $, window, document){
 			});
 	  };
 
-	  mr.video = {
-	      documentReady : documentReady        
-	  };
-
-	  mr.components.documentReady.push(documentReady);
+	  mr.components.documentReady.push(mr.video.documentReady);
 	  return mr;
 
 }(mr, jQuery, window, document));
@@ -2844,18 +2928,23 @@ mr = (function (mr, $, window, document){
 mr = (function (mr, $, window, document){
     "use strict";
     
-	  var documentReady = function($){
+    mr.wizard = mr.wizard || {};
+
+	  mr.wizard.documentReady = function($){
 
 			$('.wizard').each(function(){
-				var wizard = jQuery(this);
+				var wizard = jQuery(this), themeDefaults = {};
+ 
+        themeDefaults = {
+					headerTag: "h5",
+				  bodyTag: "section",
+					transitionEffect: "slideLeft",
+					autoFocus: true
+				}      
+				
 
 				if(!wizard.is('[role="application"][id^="steps-uid"]')){  	
-						wizard.steps({
-							headerTag: "h5",
-							bodyTag: "section",
-							transitionEffect: "slideLeft",
-							autoFocus: true
-						});
+						wizard.steps(jQuery.extend({}, themeDefaults, mr.wizard.options));
 		
 		   	    wizard.addClass('active');
 		    }
@@ -2863,11 +2952,7 @@ mr = (function (mr, $, window, document){
 		  });
 		};
 
-	  mr.wizard = {
-	      documentReady : documentReady        
-	  };
-
-	  mr.components.documentReady.push(documentReady);
+	  mr.components.documentReady.push(mr.wizard.documentReady);
 	  return mr;
 
 }(mr, jQuery, window, document));

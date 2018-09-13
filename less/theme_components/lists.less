@@ -32,6 +32,7 @@ ol{
 	margin-left: 0;
 	display: inline-block;
 	li{
+		display: inline-block;
 		padding: 0;
 		&:not(:last-child){
 			margin-right: @base-line-height;
@@ -95,6 +96,34 @@ ol{
 	.social-list{
 		a{
 			color: #fff;
+		}
+	}
+}
+
+.results-list{
+	> li > a:first-child{
+		display: flex;
+		align-items: center;
+		span{
+			display: inline-block;
+			margin-left: @base-line-height/4;
+		}
+		h4{
+			display: inline-block;
+			margin-bottom: 0;
+		}
+		&:hover{
+			h4,span{
+				text-decoration: underline;
+			}
+		}
+		margin-bottom: @base-line-height/2;
+	}
+	> li{
+		&:not(:last-child){
+			margin-bottom: @base-line-height;
+			padding-bottom: @base-line-height;
+			border-bottom: 1px solid rgba(0,0,0,0.1);
 		}
 	}
 }

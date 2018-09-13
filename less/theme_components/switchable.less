@@ -1,5 +1,18 @@
 /*! -- Stack Switchable Sections -- */
 
+@media all and (min-width: 768px){
+.switchable{
+	.container > .row{
+		flex-flow: row-reverse;
+	}
+	&.switchable--switch{
+		.container > .row{
+			flex-flow: row;
+		}
+	}
+}
+}
+
 .switchable{
 	.switchable__text{
 		margin-top: @base-line-height;
